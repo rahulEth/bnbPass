@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "BNB Pass",
+  "description": "Decentralized Password Saver Extension",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "bnb-pass.png"
+  },
+  "icons": {
+    "16": "bnb-pass-16.png",
+    "32": "bnb-pass-32.png",
+    "48": "bnb-pass-48.png",
+    "128": "bnb-pass-128.png"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "externally_connectable": {
+    "matches": ["https://metamask.io/*"],
+    "ids": ["*"]
+  },
+  "host_permissions": ["http://127.0.0.1:3000"]
+}
