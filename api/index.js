@@ -23,6 +23,7 @@ app.use(express.json());
 // Set the port number to listen on
 const PORT = process.env.PORT || 3000;
 
+console.log("process.env.MORALIS_KEY------", process.env.MORALIS_KEY)
 // Define a simple route
 app.post("/api/saveCred", (req, res) => {
   // Encrypt the message with the public key
@@ -107,7 +108,7 @@ async function uploadToIpfs(
 ) {
   const fileUploads = [
     {
-      path: "trustless-pass",
+      path: "bnb-pass",
       content: {
         publicKey,
         address,
@@ -118,13 +119,14 @@ async function uploadToIpfs(
       },
     },
   ];
-  if (!Moralis.Core.isStarted) {
+  // if (!Moralis.Core.isStarted) {
     await Moralis.start({
       apiKey: process.env.MORALIS_KEY,
     });
-  } else {
-    console.log("Moralis is already started!");
-  }
+  // } else {
+  //   console.log("Moralis is already started!");
+  // }
+  console.log('--------------------------------------')
   const resp = await Moralis.EvmApi.ipfs.uploadFolder({
     abi: fileUploads,
   });

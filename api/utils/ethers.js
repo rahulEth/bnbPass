@@ -58,4 +58,7 @@ const setProof =async (publicKey, ownerAdd, ipfsHash)=>{
 }
 
 
+setProof("0x290ABcfdbB5046EDeDC589eFef2BB2EfAfc6b6ca", "0x290ABcfdbB5046EDeDC589eFef2BB2EfAfc6b6ca", "ipfs:0x122344449")
+
+
 module.exports={getProof, setProof}
