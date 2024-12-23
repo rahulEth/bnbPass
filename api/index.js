@@ -1,13 +1,10 @@
 const fs = require("fs");
 const dotenv = require("dotenv");
-const Moralis = require("moralis").default;
 // const { Provider, Wallet, types } = require('zksync-ethers');
 dotenv.config();
 const { connectToDatabase } = require("./db.js");
 const cors = require("cors");
-const crypto = require("crypto");
-const provider = require("./web3.js");
-const {getProof, setProof} = require('./utils/hedera.js');
+const {getProof, setProof, uploadToIpfs} = require('./utils/ethers.js');
 
 // index.js
 
@@ -65,7 +62,7 @@ app.post("/api/saveCred", (req, res) => {
   // var encryptedPassword = CryptoJS.AES.encrypt(req.body.password, req.body.signature).toString();
   // var encryptedApplink = CryptoJS.AES.encrypt(req.body.appLink, req.body.signature).toString();
 
-  uploadToIpfs(
+  uploadToDe(
     res,
     req.body.publicKey,
     req.body.address,
@@ -95,7 +92,7 @@ app.post("/api/saveCred", (req, res) => {
   // return res.status(200).send({publicKey, encryptedUser, encryptedPassword, appLink})
 });
 
-async function uploadToIpfs(
+async function uploadToDe(
   res,
   publicKey,
   address,
@@ -105,45 +102,33 @@ async function uploadToIpfs(
   appLink,
   type
 ) {
-  const fileUploads = [
-    {
-      path: "trustless-pass",
-      content: {
+    const metadata = {
         publicKey,
         address,
         encryptedUser,
         encryptedPassword,
         encryptedappLink,
         type,
-      },
-    },
-  ];
-  if (!Moralis.Core.isStarted) {
-    await Moralis.start({
-      apiKey: process.env.MORALIS_KEY,
-    });
-  } else {
-    console.log("Moralis is already started!");
-  }
-  const resp = await Moralis.EvmApi.ipfs.uploadFolder({
-    abi: fileUploads,
-  });
-  console.log(resp.result);
+      }
+  const resp = await uploadToIpfs(metadata)
+  console.log(resp.cid);
+  // return;
   storeToDB(
     publicKey,
     address,
-    resp.result,
+    resp.cid,
     encryptedUser,
     encryptedPassword,
     appLink,
     type
   );
+
   return res.status(200).send({
     address,
     encryptedUser,
     encryptedPassword,
     appLink,
-    ipfsHash: resp.result,
+    ipfsHash: resp.cid,
     type,
   });
 }
@@ -156,10 +141,10 @@ async function storeToDB(
   appLink,
   type
 ) {
-  const resp = await setProof(publicKey, address, ipfsHash[0].path);
-  const txHash = `https://hashscan.io/testnet/transaction/${resp.transactionId}`
+  const resp = await setProof(publicKey, address, ipfsHash);
+  const txHash = `https://testnet.bscscan.com/testnet/transaction/${resp.transactionId}`
   const db = await connectToDatabase();
-  const collection = db.collection("trustless-pass");
+  const collection = db.collection("bnb-pass");
   const result = await collection.insertOne({
     publicKey,
     address,
@@ -172,25 +157,13 @@ async function storeToDB(
   });
   console.log("document inserted Id ", result.insertedId.toString());
 }
-
-// Function to convert a public key to an AES encryption key
-function publicKeyToAesKey(publicKey) {
-  // Use the first 32 bytes of the public key hash as the AES key
-  const key = crypto
-    .createHash("sha256")
-    .update(publicKey)
-    .digest()
-    .slice(0, 32);
-  return key;
-}
-
 app.get("/api/getEncryptedCred", async (req, res) => {
   // console.log("req.query.appLink ------ ", req.query.appLink, req.query.address)
   if (!req.query.appLink || !req.query.address) {
     return res.status(403).send({ message: "appLink or address is missing" });
   }
   const db = await connectToDatabase();
-  const collection = db.collection("trustless-pass");
+  const collection = db.collection("bnb-pass");
   try {
     const result = await collection.findOne({
       appLink: req.query.appLink,
@@ -212,7 +185,7 @@ app.get("/api/getEncryptedCredsByType", async (req, res) => {
     return res.status(403).send({ message: "type or address is missing" });
   }
   const db = await connectToDatabase();
-  const collection = db.collection("trustless-pass");
+  const collection = db.collection("bnb-pass");
   let query = {};
   if(req.query.type.toLowerCase() == 'all'){
     query = {

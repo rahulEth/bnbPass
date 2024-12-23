@@ -11,17 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hashgraph/sdk": "^2.50.0",
-    "axios": "^1.7.2",
+    "@pinata/sdk": "^2.1.0",
+    "axios": "^1.7.9",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
-    "ethers": "^6.13.2",
+    "ethers": "^5.7.2",
     "express": "^4.19.2",
     "mongodb": "^6.8.0",
-    "moralis": "^2.7.4",
-    "util": "^0.12.5",
-    "zksync-ethers": "^6.11.1"
+    "pinata": "^1.10.1",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"

@@ -1,62 +1,36 @@
 const ethers = require('ethers');
-require('dotenv').config()
-const { 
-    Client, 
-    ContractExecuteTransaction, 
-    ContractCallQuery, 
-    ContractCreateTransaction, 
-    PrivateKey, 
-    AccountId, 
-    Hbar,
-    Wallet, 
-    AccountBalanceQuery, 
-    LocalProvider,
-    ContractFunctionParameters
-} = require('@hashgraph/sdk');
-
-const operatorId = AccountId.fromString(process.env.APP_WALLET_ACCOUNTID);
-const myPrivateKey = process.env.APP_PRIVATE_KEY;
-
-// WARNING: Consider using fromStringECDSA() or fromStringED25519() on a HEX-encoded 
-// string and fromStringDer() on a HEX-encoded string with DER prefix instead.
-
-const operatorKey = PrivateKey.fromStringECDSA(myPrivateKey);
-const contractId = process.env.CONTRACT_ID_HEDERA;
-const myAccountId = process.env.APP_WALLET_ACCOUNTID;
-const client = Client.forTestnet(); // Use Client.forMainnet() for mainnet  
-
-client.setOperator(operatorId, operatorKey);
+require('dotenv').config();
 
 
 const getProof = async (key, hash)=>{
     const gasLimit = 1000000;
     const ipfsHash = hash;
     try {
-        const encodedPacked = ethers.utils.solidityPack(
-            ["string", "string"],[key, ipfsHash]);
+        // const encodedPacked = ethers.utils.solidityPack(
+        //     ["string", "string"],[key, ipfsHash]);
         
-        // Keccak256 hashing
-        const hash = ethers.utils.keccak256(encodedPacked).slice(2);
+        // // Keccak256 hashing
+        // const hash = ethers.utils.keccak256(encodedPacked).slice(2);
 
-        const query = new ContractCallQuery()
-            .setContractId(contractId)
-            .setFunction('getProof', new ContractFunctionParameters().addBytes32(Buffer.from(hash, 'hex')))
-            .setGas(gasLimit)
-            .setMaxQueryPayment(new Hbar(5)) 
-            .setSenderAccountId(myAccountId)
+        // const query = new ContractCallQuery()
+        //     .setContractId(contractId)
+        //     .setFunction('getProof', new ContractFunctionParameters().addBytes32(Buffer.from(hash, 'hex')))
+        //     .setGas(gasLimit)
+        //     .setMaxQueryPayment(new Hbar(5)) 
+        //     .setSenderAccountId(myAccountId)
 
-        //Sign with the client operator private key to pay for the query and submit the query to a Hedera network
-        const contractCallResult = await query.execute(client);
+        // //Sign with the client operator private key to pay for the query and submit the query to a Hedera network
+        // const contractCallResult = await query.execute(client);
 
-        const owner = contractCallResult.getAddress(0);
-        const publicKey = contractCallResult.getString(1);
-        const dataHash = contractCallResult.getString(2);
-        const timestamp = contractCallResult.getUint256(3);
+        // const owner = contractCallResult.getAddress(0);
+        // const publicKey = contractCallResult.getString(1);
+        // const dataHash = contractCallResult.getString(2);
+        // const timestamp = contractCallResult.getUint256(3);
         
-        console.log('Owner:', owner);
-        console.log('Public Key:', publicKey);
-        console.log('Data Hash:', dataHash);
-        console.log('Timestamp:', timestamp);
+        // console.log('Owner:', owner);
+        // console.log('Public Key:', publicKey);
+        // console.log('Data Hash:', dataHash);
+        // console.log('Timestamp:', timestamp);
 
     } catch (error) {
         console.error('Error calling contract function:', error);
@@ -69,29 +43,29 @@ const setProof =async (publicKey, ownerAdd, ipfsHash)=>{
     const gasLimit = 1000000;
     let transactionId= null;
     try {
-        const transaction = new ContractExecuteTransaction()
-        .setContractId(contractId)
-        .setGas(gasLimit)
-        .setFunction("storeProof", 
-            new ContractFunctionParameters().addString(publicKey).addAddress(ownerAdd).addString(ipfsHash)
-        )
+        // const transaction = new ContractExecuteTransaction()
+        // .setContractId(contractId)
+        // .setGas(gasLimit)
+        // .setFunction("storeProof", 
+        //     new ContractFunctionParameters().addString(publicKey).addAddress(ownerAdd).addString(ipfsHash)
+        // )
 
-        //Sign with the client operator private key to pay for the transaction and submit the query to a Hedera network
-        const txResponse = await transaction.execute(client);
+        // //Sign with the client operator private key to pay for the transaction and submit the query to a Hedera network
+        // const txResponse = await transaction.execute(client);
 
-        //Request the receipt of the transaction
-        // const receipt = await txResponse.getReceipt(client);
+        // //Request the receipt of the transaction
+        // // const receipt = await txResponse.getReceipt(client);
 
-        // Get the transactionId from the response object
-        transactionId = txResponse.transactionId.toString();
-        console.log("Transaction ID:", transactionId);
-            const receipt = await txResponse.getReceipt(client); // Adjust based on your function return type
-            console.log('Contract function result:', receipt);
-            //Get the transaction consensus status
-            const transactionStatus = receipt.status;
+        // // Get the transactionId from the response object
+        // transactionId = txResponse.transactionId.toString();
+        // console.log("Transaction ID:", transactionId);
+        //     const receipt = await txResponse.getReceipt(client); // Adjust based on your function return type
+        //     console.log('Contract function result:', receipt);
+        //     //Get the transaction consensus status
+        //     const transactionStatus = receipt.status;
         
-           console.log("The transaction consensus status is " +transactionStatus);
-        return {transactionId, ownerAdd}
+        //    console.log("The transaction consensus status is " +transactionStatus);
+        // return {transactionId, ownerAdd}
     } catch (error) {
         console.error('Error calling contract function:', error);
         return {transactionId, ownerAdd}

@@ -7,7 +7,7 @@ const providerUrl = process.env.HEDERA_TESTNET_RPC;
 // const providerUrl = 'https://eth-mainnet.alchemyapi.io/v2/YOUR_ALCHEMY_API_KEY';
 
 // Create a provider instance
-const provider = new ethers.JsonRpcProvider(providerUrl);
+const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
 // Function to get the latest block number
 async function getLatestBlockNumber() {
