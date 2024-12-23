@@ -58,7 +58,24 @@ const setProof =async (publicKey, ownerAdd, ipfsHash)=>{
 }
 
 
-setProof("0x290ABcfdbB5046EDeDC589eFef2BB2EfAfc6b6ca", "0x290ABcfdbB5046EDeDC589eFef2BB2EfAfc6b6ca", "ipfs:0x122344449")
 
+const { PinataSDK } = require("pinata");
 
-module.exports={getProof, setProof}
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT,
+  pinataGateway: process.env.PINATA_GATEWAY,
+});
+
+async function uploadToIpfs(metadata) {
+  try {
+    const file = new File([metadata], "bnbpass.json", { type: "text/json" });
+    const upload = await pinata.upload.file(file);
+    console.log({upload});
+    return upload;
+  } catch (error) {
+    console.log(error);
+    return {}
+  }
+}
+
+module.exports={getProof, setProof, uploadToIpfs}

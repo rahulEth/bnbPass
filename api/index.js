@@ -1,13 +1,10 @@
 const fs = require("fs");
 const dotenv = require("dotenv");
-const Moralis = require("moralis").default;
 // const { Provider, Wallet, types } = require('zksync-ethers');
 dotenv.config();
 const { connectToDatabase } = require("./db.js");
 const cors = require("cors");
-const crypto = require("crypto");
-const provider = require("./web3.js");
-const {getProof, setProof} = require('./utils/ethers.js');
+const {getProof, setProof, uploadToIpfs} = require('./utils/ethers.js');
 
 // index.js
 
@@ -23,7 +20,12 @@ app.use(express.json());
 // Set the port number to listen on
 const PORT = process.env.PORT || 3000;
 
-console.log("process.env.MORALIS_KEY------", process.env.MORALIS_KEY)
+const { PinataSDK } = require("pinata");
+
+const pinata = new PinataSDK({
+  pinataJwt: process.env.PINATA_JWT ,//process.env.PINATA_JWT!,
+  pinataGateway: process.env.PINATA_GATEWAY,
+});
 // Define a simple route
 app.post("/api/saveCred", (req, res) => {
   // Encrypt the message with the public key
@@ -66,7 +68,7 @@ app.post("/api/saveCred", (req, res) => {
   // var encryptedPassword = CryptoJS.AES.encrypt(req.body.password, req.body.signature).toString();
   // var encryptedApplink = CryptoJS.AES.encrypt(req.body.appLink, req.body.signature).toString();
 
-  uploadToIpfs(
+  uploadToDe(
     res,
     req.body.publicKey,
     req.body.address,
@@ -96,7 +98,7 @@ app.post("/api/saveCred", (req, res) => {
   // return res.status(200).send({publicKey, encryptedUser, encryptedPassword, appLink})
 });
 
-async function uploadToIpfs(
+async function uploadToDe(
   res,
   publicKey,
   address,
@@ -106,46 +108,33 @@ async function uploadToIpfs(
   appLink,
   type
 ) {
-  const fileUploads = [
-    {
-      path: "bnb-pass",
-      content: {
+    const metadata = {
         publicKey,
         address,
         encryptedUser,
         encryptedPassword,
         encryptedappLink,
         type,
-      },
-    },
-  ];
-  // if (!Moralis.Core.isStarted) {
-    await Moralis.start({
-      apiKey: process.env.MORALIS_KEY,
-    });
-  // } else {
-  //   console.log("Moralis is already started!");
-  // }
-  console.log('--------------------------------------')
-  const resp = await Moralis.EvmApi.ipfs.uploadFolder({
-    abi: fileUploads,
-  });
-  console.log(resp.result);
+      }
+  const resp = await uploadToIpfs(metadata)
+  console.log(resp.cid);
+  // return;
   storeToDB(
     publicKey,
     address,
-    resp.result,
+    resp.cid,
     encryptedUser,
     encryptedPassword,
     appLink,
     type
   );
+
   return res.status(200).send({
     address,
     encryptedUser,
     encryptedPassword,
     appLink,
-    ipfsHash: resp.result,
+    ipfsHash: resp.cid,
     type,
   });
 }
@@ -158,7 +147,7 @@ async function storeToDB(
   appLink,
   type
 ) {
-  const resp = await setProof(publicKey, address, ipfsHash[0].path);
+  const resp = await setProof(publicKey, address, ipfsHash);
   const txHash = `https://testnet.bscscan.com/testnet/transaction/${resp.transactionId}`
   const db = await connectToDatabase();
   const collection = db.collection("bnb-pass");
