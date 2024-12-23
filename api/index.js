@@ -20,12 +20,6 @@ app.use(express.json());
 // Set the port number to listen on
 const PORT = process.env.PORT || 3000;
 
-const { PinataSDK } = require("pinata");
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.PINATA_JWT ,//process.env.PINATA_JWT!,
-  pinataGateway: process.env.PINATA_GATEWAY,
-});
 // Define a simple route
 app.post("/api/saveCred", (req, res) => {
   // Encrypt the message with the public key
@@ -169,7 +163,7 @@ app.get("/api/getEncryptedCred", async (req, res) => {
     return res.status(403).send({ message: "appLink or address is missing" });
   }
   const db = await connectToDatabase();
-  const collection = db.collection("trustless-pass");
+  const collection = db.collection("bnb-pass");
   try {
     const result = await collection.findOne({
       appLink: req.query.appLink,
@@ -191,7 +185,7 @@ app.get("/api/getEncryptedCredsByType", async (req, res) => {
     return res.status(403).send({ message: "type or address is missing" });
   }
   const db = await connectToDatabase();
-  const collection = db.collection("trustless-pass");
+  const collection = db.collection("bnb-pass");
   let query = {};
   if(req.query.type.toLowerCase() == 'all'){
     query = {
