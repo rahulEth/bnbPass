@@ -44,7 +44,7 @@ const setProof =async (publicKey, ownerAdd, ipfsHash)=>{
        const bnbPassContract = new ethers.Contract(process.env.CONTRACT_ADDR, ABI, wallet);
 
        // Send the transaction
-       const tx = await bnbPassContract.storeProof(publicKey, ownerAdd, ipfsHash);
+       const tx = await bnbPassContract.storeProof(publicKey, ownerAdd, ipfsHash, {gasLimit: ethers.utils.hexlify(5000000)});
        
        console.log("Transaction hash:", tx.hash);
        const transactionId = tx.hash;
@@ -68,9 +68,8 @@ const pinata = new PinataSDK({
 
 async function uploadToIpfs(metadata) {
   try {
-    const file = new File([metadata], "bnbpass.json", { type: "text/json" });
-    const upload = await pinata.upload.file(file);
-    console.log({upload});
+    // const file = new File([metadata], "bnbpass-1.json", { type: "text/json" });
+    const upload = await pinata.upload.json(metadata)
     return upload;
   } catch (error) {
     console.log(error);

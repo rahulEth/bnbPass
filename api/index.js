@@ -61,14 +61,13 @@ app.post("/api/saveCred", (req, res) => {
   // var encryptedUser = CryptoJS.AES.encrypt(req.body.user, req.body.signature).toString();
   // var encryptedPassword = CryptoJS.AES.encrypt(req.body.password, req.body.signature).toString();
   // var encryptedApplink = CryptoJS.AES.encrypt(req.body.appLink, req.body.signature).toString();
-
   uploadToDe(
     res,
     req.body.publicKey,
     req.body.address,
     req.body.encryptedUser,
     req.body.encryptedPassword,
-    req.body.encryptedApplink,
+    req.body.encryptedappLink,
     req.body.appLink,
     type.toLowerCase()
   );
@@ -109,9 +108,8 @@ async function uploadToDe(
         encryptedPassword,
         encryptedappLink,
         type,
-      }
+      }  
   const resp = await uploadToIpfs(metadata)
-  console.log(resp.cid);
   // return;
   storeToDB(
     publicKey,
@@ -142,7 +140,7 @@ async function storeToDB(
   type
 ) {
   const resp = await setProof(publicKey, address, ipfsHash);
-  const txHash = `https://testnet.bscscan.com/testnet/transaction/${resp.transactionId}`
+  const txHash = `https://testnet.bscscan.com/tx/${resp.transactionId}`
   const db = await connectToDatabase();
   const collection = db.collection("bnb-pass");
   const result = await collection.insertOne({
