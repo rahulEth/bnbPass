@@ -114,7 +114,7 @@ async function uploadToDe(
   storeToDB(
     publicKey,
     address,
-    resp.cid,
+    resp.IpfsHash,
     encryptedUser,
     encryptedPassword,
     appLink,
@@ -126,7 +126,7 @@ async function uploadToDe(
     encryptedUser,
     encryptedPassword,
     appLink,
-    ipfsHash: resp.cid,
+    ipfsHash: [{cid: resp.cid, path: `https://gateway.pinata.cloud/ipfs/${resp.IpfsHash}`}],
     type,
   });
 }

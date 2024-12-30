@@ -59,7 +59,9 @@ const setProof =async (publicKey, ownerAdd, ipfsHash)=>{
 
 
 
-const { PinataSDK } = require("pinata");
+// const { PinataSDK } = require("pinata");
+
+const { PinataSDK } = require("pinata-web3");
 
 const pinata = new PinataSDK({
   pinataJwt: process.env.PINATA_JWT,
@@ -69,7 +71,8 @@ const pinata = new PinataSDK({
 async function uploadToIpfs(metadata) {
   try {
     // const file = new File([metadata], "bnbpass-1.json", { type: "text/json" });
-    const upload = await pinata.upload.json(metadata)
+    const upload = await pinata.upload.json(metadata);
+    // console.log("upload-------------- ", upload.IpfsHash)
     return upload;
   } catch (error) {
     console.log(error);
